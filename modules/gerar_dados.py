@@ -1,5 +1,3 @@
-from time import perf_counter
-
 import pandas as pd
 
 from modules.classes.classes_base import Jogo, Time
