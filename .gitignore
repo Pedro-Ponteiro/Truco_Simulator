@@ -1,5 +1,8 @@
-*
+*.*
 
 !.gitignore
 !*.py
 analisar.py
+!modules
+venv
+__pycache__
