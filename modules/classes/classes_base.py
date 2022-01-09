@@ -6,7 +6,6 @@ from typing import Dict, List, Tuple, Union
 from modules.classes.baralho import Baralho, Carta
 
 
-@dataclass
 class Jogada:
     def __init__(self, jogador: Jogador, valor_carta: int) -> None:
         self.jogador = jogador
@@ -27,7 +26,7 @@ class Jogador:
     def escolher_jogada(self, jogadas_rodada: List[Jogada], mesa: Mesa) -> Jogada:
         ...
 
-    def analisar_cartas_mao(self, mesa: Mesa) -> None:
+    def ordenar_cartas_mao(self) -> None:
         ...
 
     def __str__(self) -> str:
@@ -36,7 +35,8 @@ class Jogador:
 
     def __repr__(self) -> str:
 
-        return f"Jogador(mao={self.mao},nome={self.nome},parceiro={self.parceiro.nome}"
+        # return f"Jogador(mao={self.mao},nome={self.nome},parceiro={self.parceiro.nome}"
+        return self.nome
 
 
 class Time:
@@ -53,10 +53,10 @@ class Time:
         self.pontos_mesa: int = 0
 
     def __str__(self) -> str:
-        return f"Time(nome={self.nome},pode_trucar={self.pode_trucar},mao_de_onze={self.mao_de_onze},pts_jogo={self.pontos_jogo},pts_mesa={self.pontos_mesa})"
+        return f"Time(nome={self.nome},pts_jogo={self.pontos_jogo},pts_mesa={self.pontos_mesa})"
 
     def __repr__(self) -> str:
-        return f"Time(nome={self.nome},pode_trucar={self.pode_trucar},mao_de_onze={self.mao_de_onze},pts_jogo={self.pontos_jogo},pts_mesa={self.pontos_mesa})"
+        return f"Time(nome={self.nome},pts_jogo={self.pontos_jogo},pts_mesa={self.pontos_mesa})"
 
 
 class Rodada:
@@ -66,23 +66,24 @@ class Rodada:
         self.time2 = time2
 
     def get_vencedor(self, jogadores: List[Jogador], mesa: Mesa) -> List[Jogador]:
-        max_scorer: List[Time] = []
-        max_score = 0
+        player_max_scorer: List[Jogador] = []
+        player_max_score = 0
         for jogador in jogadores:
             jogada = jogador._wrap_escolher_jogada(self.jogadas, mesa)
-
+            # print(jogada)
             self.jogadas.append(jogada)
+            # print(self.jogadas)
             mesa.jogadas_mesa.append(jogada)
 
             score = jogada.valor_carta
-            if score > max_score:
-                max_scorer = [jogador]
-                max_score = score
-            elif score == max_score:
-                if max_scorer[0] != jogador.parceiro.time:
-                    max_scorer = max_scorer + [jogador]
-
-        return max_scorer
+            if score > player_max_score:
+                player_max_scorer = [jogador]
+                player_max_score = score
+            elif score == player_max_score:
+                if player_max_scorer[0] != jogador.parceiro:
+                    player_max_scorer = player_max_scorer + [jogador]
+        # print("-" * 10)
+        return player_max_scorer
 
 
 class Mesa:
@@ -135,15 +136,33 @@ class Mesa:
                 if carta.num == self.manilha:
                     carta = Carta(carta.type, self.baralho.valor_maximo + carta.type)
                 jogador.mao.append(carta)
-
-            cartas = sorted(jogador.mao, key=lambda c: c.num)
-
+            cartas_ord = sorted(jogador.mao, key=lambda c: c.num)
+            jogador.mao = cartas_ord
             registro_jogador = self.stats[jogador.nome]
-            registro_jogador["high_carta"] = cartas[2].num
-            registro_jogador["medium_carta"] = cartas[1].num
-            registro_jogador["low_carta"] = cartas[0].num
+            registro_jogador["high_carta"] = cartas_ord[2].num
+            registro_jogador["medium_carta"] = cartas_ord[1].num
+            registro_jogador["low_carta"] = cartas_ord[0].num
 
-            jogador.analisar_cartas_mao(self)
+        # cartas_time1 = sorted(jogadores[0].mao + jogadores[2].mao, key=lambda x: x.num)
+        # cartas_time2 = sorted(jogadores[1].mao + jogadores[3].mao, key=lambda x: x.num)
+        # pts_time1 = sum([c.num for c in cartas_time1[-2:]])
+        # pts_time2 = sum([c.num for c in cartas_time2[-2:]])
+
+        # if pts_time1 == pts_time2:
+        #     pts_time1 = sum([c.num for c in cartas_time1[-3:]])
+        #     pts_time2 = sum([c.num for c in cartas_time2[-3:]])
+
+        # print("-------------------")
+        # if pts_time1 > pts_time2:
+        #     print(f"{jogadores[0].time} deveria vencer com {pts_time1}")
+        #     self.deveria_vencer: Time = jogadores[0].time
+        # elif pts_time2 > pts_time1:
+        #     print(f"{jogadores[1].time} deveria vencer com {pts_time2}")
+        #     self.deveria_vencer: Time = jogadores[1].time
+        # else:
+        #     print("Ninguem deveria vencer!")
+        #     self.deveria_vencer: Time = None
+        # print("------------------")
 
     def setup_jogador_time(self, time1: Time, time2: Time) -> None:
         time1.pontos_mesa = 0
@@ -182,8 +201,8 @@ class Mesa:
             vencedores.append(rodada_winner)
 
             if len(rodada_winner) == 1:
-                # TODO: player whon wins starts the next round
-                ...
+                idx = jogadores.index(rodada_winner[0])
+                self.jogadores = jogadores[idx:] + jogadores[:idx]
 
             for jogador in rodada_winner:
                 jogador.time.pontos_mesa += 1
@@ -206,6 +225,17 @@ class Mesa:
                         vencedor = None
 
                 break
+
+        # # TODO: TESTE
+        # print("-" * 10)
+        # print("-" * 10)
+        # print(f"{vencedor} é o vencedor!")
+        # if (not self.deveria_vencer is None) and (vencedor != self.deveria_vencer):
+        #     raise Exception("Ele não deveria vencer! Oh no....")
+
+        # print("-" * 10)
+        # print("-" * 10)
+
         self.register_scores(vencedor)
         self.setup_jogador_time(time1, time2)
         return vencedor, self.next_jogadores

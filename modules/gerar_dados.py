@@ -10,7 +10,7 @@ def main() -> int:
     time1 = Time("PENU", jogador1, jogador2)
     time2 = Time("ARIMA", jogador3, jogador4)
 
-    nr_maos = 1_000_000
+    nr_maos = 40_000_000
     nr_mesas = nr_maos // 4
 
     jogo = Jogo(nr_mesas, [jogador1, jogador3, jogador2, jogador4], time1, time2)
@@ -19,5 +19,6 @@ def main() -> int:
     print(f"Quantidade de mãos geradas: {len(df)}")
 
     df.to_pickle(r".\modules\db\dados.pickle")
+    df.to_csv(r".\modules\db\dados.csv")
 
     return len(df)

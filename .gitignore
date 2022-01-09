@@ -1,7 +1,4 @@
-*.*
-
-!.gitignore
-!*.py
-!modules
 venv
+db/
 __pycache__
+analytics/
