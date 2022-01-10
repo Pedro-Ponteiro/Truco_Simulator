@@ -11,6 +11,9 @@ class Jogada:
         self.jogador = jogador
         self.valor_carta = valor_carta
 
+    def __str__(self) -> str:
+        return f"\nJogada(jogador={self.jogador.nome}, \nmao_jogador={[c.num for c in self.jogador.mao]}, \nvalor_carta={self.valor_carta})"
+
 
 class Jogador:
     def __init__(self, nome: str) -> None:
@@ -19,9 +22,11 @@ class Jogador:
         self.parceiro: Jogador = None
         self.time: Time = None
 
-    def _wrap_escolher_jogada(self, jogadas_rodada: List[Jogada], mesa: Mesa) -> Jogada:
+    def _wrap_escolher_jogada(
+        self, jogadas_rodada: List[Jogada], mesa: Mesa, time_inimigo: Time
+    ) -> Jogada:
 
-        return self.escolher_jogada(jogadas_rodada, mesa)
+        return self.escolher_jogada(jogadas_rodada, mesa, time_inimigo)
 
     def escolher_jogada(self, jogadas_rodada: List[Jogada], mesa: Mesa) -> Jogada:
         ...
@@ -31,7 +36,7 @@ class Jogador:
 
     def __str__(self) -> str:
 
-        return f"Jogador(mao={self.mao},nome={self.nome},parceiro={self.parceiro.nome}"
+        return f"Jogador(mao={[c.num for c in self.mao]},nome={self.nome},parceiro={self.parceiro.nome})"
 
     def __repr__(self) -> str:
 
@@ -68,8 +73,11 @@ class Rodada:
     def get_vencedor(self, jogadores: List[Jogador], mesa: Mesa) -> List[Jogador]:
         player_max_scorer: List[Jogador] = []
         player_max_score = 0
-        for jogador in jogadores:
-            jogada = jogador._wrap_escolher_jogada(self.jogadas, mesa)
+        for idx_jogador in range(0, len(jogadores)):
+
+            jogador = jogadores[idx_jogador]
+            time_inimigo = jogadores[idx_jogador - 1].time
+            jogada = jogador._wrap_escolher_jogada(self.jogadas, mesa, time_inimigo)
             # print(jogada)
             self.jogadas.append(jogada)
             # print(self.jogadas)
@@ -143,6 +151,7 @@ class Mesa:
             registro_jogador["medium_carta"] = cartas_ord[1].num
             registro_jogador["low_carta"] = cartas_ord[0].num
 
+        # TODO: TESTES AQUI PRA BAIXO
         # cartas_time1 = sorted(jogadores[0].mao + jogadores[2].mao, key=lambda x: x.num)
         # cartas_time2 = sorted(jogadores[1].mao + jogadores[3].mao, key=lambda x: x.num)
         # pts_time1 = sum([c.num for c in cartas_time1[-2:]])
@@ -226,12 +235,12 @@ class Mesa:
 
                 break
 
-        # # TODO: TESTE
+        # TODO: TESTE
         # print("-" * 10)
         # print("-" * 10)
         # print(f"{vencedor} é o vencedor!")
         # if (not self.deveria_vencer is None) and (vencedor != self.deveria_vencer):
-        #     raise Exception("Ele não deveria vencer! Oh no....")
+        #     input("Ele não deveria vencer! Oh no....")
 
         # print("-" * 10)
         # print("-" * 10)
