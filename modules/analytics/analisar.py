@@ -4,6 +4,7 @@ import pandas as pd
 def read_data() -> pd.DataFrame:
 
     # colunas: ['high_carta', 'medium_carta', 'low_carta', 'resultado', 'hand']
+    # TODO: caminho para seus dados aqui:
     df = pd.read_pickle(r".\modules\db\dados_processados.pickle")
     return df
 

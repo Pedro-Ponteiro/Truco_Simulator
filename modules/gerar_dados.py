@@ -20,7 +20,7 @@ def main(nr_maos: int) -> int:
     df = pd.DataFrame(jogo.mesas_stats)
     print(f"Quantidade de mãos geradas: {len(df)}")
 
-    df.to_pickle(os.path.join("modules", "db", "dados.pickle"))
-    df.to_csv(os.path.join("modules", "db", "dados.csv"))
+    df.to_pickle(os.path.join(".", "dados.pickle"))
+    df.to_csv(os.path.join(".", "dados.csv"))
 
     return len(df)
