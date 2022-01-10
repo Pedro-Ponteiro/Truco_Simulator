@@ -14,6 +14,7 @@ def main(nr_maos: int) -> int:
 
     nr_mesas = nr_maos // 4
 
+    # TODO: passar apenas o time1 e time2 como parametros
     jogo = Jogo(nr_mesas, [jogador1, jogador3, jogador2, jogador4], time1, time2)
 
     df = pd.DataFrame(jogo.mesas_stats)
