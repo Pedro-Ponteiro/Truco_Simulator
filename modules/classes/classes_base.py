@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Dict, List, Tuple, Union
 
 from modules.classes.baralho import Baralho, Carta
@@ -12,7 +11,11 @@ class Jogada:
         self.valor_carta = valor_carta
 
     def __str__(self) -> str:
-        return f"\nJogada(jogador={self.jogador.nome}, \nmao_jogador={[c.num for c in self.jogador.mao]}, \nvalor_carta={self.valor_carta})"
+        return (
+            f"\nJogada(jogador={self.jogador.nome},"
+            + " \nmao_jogador={[c.num for c in self.jogador.mao]},"
+            + " \nvalor_carta={self.valor_carta})"
+        )
 
 
 class Jogador:
@@ -36,11 +39,14 @@ class Jogador:
 
     def __str__(self) -> str:
 
-        return f"Jogador(mao={[c.num for c in self.mao]},nome={self.nome},parceiro={self.parceiro.nome})"
+        return (
+            f"Jogador(mao={[c.num for c in self.mao]},"
+            + "nome={self.nome},"
+            + "parceiro={self.parceiro.nome})"
+        )
 
     def __repr__(self) -> str:
 
-        # return f"Jogador(mao={self.mao},nome={self.nome},parceiro={self.parceiro.nome}"
         return self.nome
 
 
@@ -58,10 +64,18 @@ class Time:
         self.pontos_mesa: int = 0
 
     def __str__(self) -> str:
-        return f"Time(nome={self.nome},pts_jogo={self.pontos_jogo},pts_mesa={self.pontos_mesa})"
+        return (
+            f"Time(nome={self.nome},"
+            + "pts_jogo={self.pontos_jogo},"
+            + "pts_mesa={self.pontos_mesa})"
+        )
 
     def __repr__(self) -> str:
-        return f"Time(nome={self.nome},pts_jogo={self.pontos_jogo},pts_mesa={self.pontos_mesa})"
+        return (
+            f"Time(nome={self.nome},"
+            + "pts_jogo={self.pontos_jogo},"
+            + "pts_mesa={self.pontos_mesa})"
+        )
 
 
 class Rodada:
@@ -152,8 +166,10 @@ class Mesa:
             registro_jogador["low_carta"] = cartas_ord[0].num
 
         # TODO: TESTES AQUI PRA BAIXO
-        # cartas_time1 = sorted(jogadores[0].mao + jogadores[2].mao, key=lambda x: x.num)
-        # cartas_time2 = sorted(jogadores[1].mao + jogadores[3].mao, key=lambda x: x.num)
+        # cartas_time1 = sorted(jogadores[0].mao + jogadores[2].mao,
+        # key=lambda x: x.num)
+        # cartas_time2 = sorted(jogadores[1].mao + jogadores[3].mao,
+        # key=lambda x: x.num)
         # pts_time1 = sum([c.num for c in cartas_time1[-2:]])
         # pts_time2 = sum([c.num for c in cartas_time2[-2:]])
 
