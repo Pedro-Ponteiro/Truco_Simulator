@@ -1,3 +1,5 @@
+"""Player classes that uses strategy to choose best cards."""
+
 from typing import List, Optional
 
 from modules.classes.baralho import Carta
@@ -5,7 +7,7 @@ from modules.classes.classes_base import Jogada, Jogador, Mesa, Time
 
 
 class Estrategia:
-    """Strategy used by NormalPlayer"""
+    """Strategy used by NormalPlayer."""
 
     def __init__(
         self,
@@ -40,7 +42,7 @@ class Estrategia:
         return self.turno_estrategia[self.turno]()
 
     def primeiro_turno(self) -> Carta:
-        """Strategy for the first turn
+        """Strategy for the first turn.
 
         Returns:
             Carta: chosen card
@@ -126,9 +128,11 @@ class Estrategia:
             for j in self.jogadas_rodada
             if j.valor_carta == self.maior_carta_rodada.valor_carta
         ]
-        if len(maior_carta_entre_jogadas) > 1:
-            if self.jogador.parceiro in maior_carta_entre_jogadas:
-                return True
+        if (
+            len(maior_carta_entre_jogadas) > 1
+            and self.jogador.parceiro in maior_carta_entre_jogadas
+        ):
+            return True
 
         return False
 

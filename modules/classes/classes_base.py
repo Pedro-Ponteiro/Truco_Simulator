@@ -69,7 +69,7 @@ class Jogador:
 class Time:
     """Team of three players."""
 
-    def __init__(self, nome, jogador1: Jogador, jogador2: Jogador) -> None:
+    def __init__(self, nome: str, jogador1: Jogador, jogador2: Jogador) -> None:
         self.nome: str = nome
         self.jogadores: List[Jogador] = (jogador1, jogador2)
         jogador1.parceiro = jogador2
@@ -130,15 +130,14 @@ class Rodada:
             if score > player_max_score:
                 player_max_scorer = [jogador]
                 player_max_score = score
-            elif score == player_max_score:
-                if player_max_scorer[0] != jogador.parceiro:
-                    player_max_scorer = player_max_scorer + [jogador]
+            elif score == player_max_score and player_max_scorer[0] != jogador.parceiro:
+                player_max_scorer = player_max_scorer + [jogador]
         # print("-" * 10)
         return player_max_scorer
 
 
 class Mesa:
-    """Game made of three rounds"""
+    """Game made of three rounds."""
 
     def __init__(self, jogo: Jogo, valor: int = 1) -> None:
 
@@ -173,7 +172,7 @@ class Mesa:
             for jogador in jogo.jogadores
         }
 
-    def distribuir_cartas(self, jogadores: List[Jogador]):
+    def distribuir_cartas(self, jogadores: List[Jogador]) -> None:
         """Distribute cards among players.
 
         Args:
@@ -191,7 +190,7 @@ class Mesa:
             for _ in range(3):
                 carta = self.baralho.cartas.pop()
                 if carta.num == self.manilha:
-                    carta = Carta(carta.type, self.baralho.valor_maximo + carta.type)
+                    carta = Carta(carta.suit, self.baralho.valor_maximo + carta.suit)
                 jogador.mao.append(carta)
             cartas_ord = sorted(jogador.mao, key=lambda c: c.num)
             jogador.mao = cartas_ord
