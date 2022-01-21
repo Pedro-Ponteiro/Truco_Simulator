@@ -28,7 +28,7 @@ class Jogador:
     def _wrap_escolher_jogada(
         self, jogadas_rodada: List[Jogada], mesa: Mesa, time_inimigo: Time
     ) -> Jogada:
-        """Wrapper that is used by Game object to interact with Player object
+        """Wrapper that is used by Game object to interact with Player object.
 
         Args:
             jogadas_rodada (List[Jogada]): list of player moves during the round
@@ -38,7 +38,6 @@ class Jogador:
         Returns:
             Jogada: chosen card
         """
-
         return self.escolher_jogada(jogadas_rodada, mesa, time_inimigo)
 
     def escolher_jogada(self, jogadas_rodada: List[Jogada], mesa: Mesa) -> Jogada:
