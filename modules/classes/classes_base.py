@@ -1,23 +1,19 @@
+"""Base classes for the game."""
+
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Dict, List, Tuple, Union
 
 from modules.classes.baralho import Baralho, Carta
 
 
+@dataclass
 class Jogada:
     """Player move."""
 
-    def __init__(self, jogador: Jogador, valor_carta: int) -> None:
-        self.jogador = jogador
-        self.valor_carta = valor_carta
-
-    def __str__(self) -> str:
-        return (
-            f"\nJogada(jogador={self.jogador.nome},"
-            + " \nmao_jogador={[c.num for c in self.jogador.mao]},"
-            + " \nvalor_carta={self.valor_carta})"
-        )
+    jogador: Jogador
+    valor_carta: int
 
 
 class Jogador:
@@ -32,13 +28,29 @@ class Jogador:
     def _wrap_escolher_jogada(
         self, jogadas_rodada: List[Jogada], mesa: Mesa, time_inimigo: Time
     ) -> Jogada:
+        """Wrapper that is used by Game object to interact with Player object
+
+        Args:
+            jogadas_rodada (List[Jogada]): list of player moves during the round
+            mesa (Mesa): list of player moves during the 3 round game
+            time_inimigo (Time): enemy team object
+
+        Returns:
+            Jogada: chosen card
+        """
 
         return self.escolher_jogada(jogadas_rodada, mesa, time_inimigo)
 
     def escolher_jogada(self, jogadas_rodada: List[Jogada], mesa: Mesa) -> Jogada:
-        ...
+        """Abstract method for children to implement.
 
-    def ordenar_cartas_mao(self) -> None:
+        Args:
+            jogadas_rodada (List[Jogada]): list of player moves during the round
+            mesa (Mesa): list of player moves during the 3 round game
+
+        Returns:
+            Jogada: chosen card
+        """
         ...
 
     def __str__(self) -> str:
@@ -55,7 +67,7 @@ class Jogador:
 
 
 class Time:
-    """Team dataclass."""
+    """Team of three players."""
 
     def __init__(self, nome, jogador1: Jogador, jogador2: Jogador) -> None:
         self.nome: str = nome
@@ -167,7 +179,6 @@ class Mesa:
         Args:
             jogadores (List[Jogador]): players participating
         """
-
         self.vira = self.baralho.cartas.pop().num
 
         # manilha é a proxima!
@@ -214,7 +225,7 @@ class Mesa:
         # print("------------------")
 
     def setup_jogador_time(self, time1: Time, time2: Time) -> None:
-        """resets the players hands and team points
+        """Resets the players hands and team points.
 
         Args:
             time1 (Time): team 1
@@ -226,12 +237,11 @@ class Mesa:
         [jogador.mao.clear() for jogador in self.jogadores]
 
     def register_scores(self, time_vencedor: Time | None) -> None:
-        """Updates the "results" column for each player
+        """Updates the "results" column for each player.
 
         Args:
             time_vencedor (Time): winner team
         """
-
         # caso empate
         if time_vencedor is None:
             for j in self.jogo.jogadores:
@@ -248,7 +258,7 @@ class Mesa:
         time2: Time,
         valor: int = 1,
     ) -> Tuple[Union[Time, None], List[Jogador]]:
-        """Simulate 3 rounds and determines the winners
+        """Simulate 3 rounds and determines the winners.
 
         Args:
             jogadores (List[Jogador]): list of players
@@ -259,7 +269,6 @@ class Mesa:
         Returns:
             Tuple[Union[Time, None], List[Jogador]]: winner(s) (None if draw)
         """
-
         # TODO: test the unlikely cases
 
         self.jogadores = jogadores

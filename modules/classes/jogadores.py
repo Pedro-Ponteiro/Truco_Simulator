@@ -58,7 +58,6 @@ class Estrategia:
         Returns:
             Carta: chosen card
         """
-
         maior_carta_mao = self.jogador.get_maior_carta_mao()
         menor_carta_mao = self.jogador.get_menor_carta_mao()
 
@@ -97,7 +96,6 @@ class Estrategia:
         Returns:
             Carta: chosen card
         """
-
         if self.is_empate():
             if self.pontos_time_rival > 0:
                 return self.jogador.get_maior_carta_mao()
@@ -123,7 +121,6 @@ class Estrategia:
         Returns:
             bool: True if draw, False otherwise.
         """
-
         maior_carta_entre_jogadas = [
             j.jogador
             for j in self.jogadas_rodada
@@ -142,6 +139,8 @@ class JogadorProbabilistico(Jogador):
     Args:
         Jogador: Abstract super class. Has methods wrapping these ones.
     """
+
+    # TODO: transfer generic methos to abstract class
 
     def get_maior_carta_mao(self) -> Carta:
         """Returns highest available card.
@@ -200,7 +199,6 @@ class JogadorProbabilistico(Jogador):
         Returns:
             Jogada: player move
         """
-
         turno: int = len(jogadas_rodada) + 1
 
         maior_carta_rodada = (

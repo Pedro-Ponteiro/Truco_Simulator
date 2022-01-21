@@ -1,3 +1,5 @@
+"""Uses the players and game classes to simulate a given number of games"""
+
 import os
 
 import pandas as pd

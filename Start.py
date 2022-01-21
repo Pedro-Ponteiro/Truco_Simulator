@@ -1,3 +1,5 @@
+"""Run this to start the simulation."""
+
 from time import perf_counter
 
 import modules.gerar_dados
@@ -5,7 +7,6 @@ import modules.gerar_dados
 
 def main() -> None:
     """Start the program."""
-
     nr_maos = int(input("Quantidade de maos para gerar: \n-> "))
 
     start = perf_counter()
