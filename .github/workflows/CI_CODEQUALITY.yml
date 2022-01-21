@@ -32,7 +32,7 @@ jobs:
           flake8-comprehensions flake8-simplify \
           flake8-bandit flake8-black flake8-functions \
           flake8-expression-complexity flake8-cognitive-complexity
-          flake8 --exclude=venv/* --ignore=ANN101,W503,D104,D107,D105, --max-complexity=10 --max-line-length=88 .
+          flake8 --exclude=venv/* --ignore=ANN101,W503,D104,D107,D105,D401 --max-complexity=10 --max-line-length=88 .
       - name: Isort Enforcer
         run: |
           python${{ matrix.python-version }} -m pip install isort \
