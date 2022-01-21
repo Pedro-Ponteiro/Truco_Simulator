@@ -4,6 +4,7 @@ import modules.gerar_dados
 
 
 def main() -> None:
+    """Start the program."""
 
     nr_maos = int(input("Quantidade de maos para gerar: \n-> "))
 

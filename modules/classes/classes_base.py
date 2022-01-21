@@ -6,6 +6,8 @@ from modules.classes.baralho import Baralho, Carta
 
 
 class Jogada:
+    """Player move."""
+
     def __init__(self, jogador: Jogador, valor_carta: int) -> None:
         self.jogador = jogador
         self.valor_carta = valor_carta
@@ -19,6 +21,8 @@ class Jogada:
 
 
 class Jogador:
+    """Player abstract class."""
+
     def __init__(self, nome: str) -> None:
         self.mao: List[Carta] = []
         self.nome: str = nome
@@ -51,6 +55,8 @@ class Jogador:
 
 
 class Time:
+    """Team dataclass."""
+
     def __init__(self, nome, jogador1: Jogador, jogador2: Jogador) -> None:
         self.nome: str = nome
         self.jogadores: List[Jogador] = (jogador1, jogador2)
@@ -79,12 +85,23 @@ class Time:
 
 
 class Rodada:
+    """Round of the game (each game is made of 3 of these)."""
+
     def __init__(self, time1: Time, time2: Time) -> None:
         self.jogadas: List[Jogada] = []
         self.time1 = time1
         self.time2 = time2
 
     def get_vencedor(self, jogadores: List[Jogador], mesa: Mesa) -> List[Jogador]:
+        """Iterates through players and decides round winner.
+
+        Args:
+            jogadores (List[Jogador]): players list
+            mesa (Mesa): game in which the round belongs
+
+        Returns:
+            List[Jogador]: list of winners (more than one if draw)
+        """
         player_max_scorer: List[Jogador] = []
         player_max_score = 0
         for idx_jogador in range(0, len(jogadores)):
@@ -109,6 +126,8 @@ class Rodada:
 
 
 class Mesa:
+    """Game made of three rounds"""
+
     def __init__(self, jogo: Jogo, valor: int = 1) -> None:
 
         # preparando o baralho...
@@ -143,6 +162,11 @@ class Mesa:
         }
 
     def distribuir_cartas(self, jogadores: List[Jogador]):
+        """Distribute cards among players.
+
+        Args:
+            jogadores (List[Jogador]): players participating
+        """
 
         self.vira = self.baralho.cartas.pop().num
 
@@ -190,12 +214,24 @@ class Mesa:
         # print("------------------")
 
     def setup_jogador_time(self, time1: Time, time2: Time) -> None:
+        """resets the players hands and team points
+
+        Args:
+            time1 (Time): team 1
+            time2 (Time): team 2
+        """
         time1.pontos_mesa = 0
         time2.pontos_mesa = 0
 
         [jogador.mao.clear() for jogador in self.jogadores]
 
     def register_scores(self, time_vencedor: Time | None) -> None:
+        """Updates the "results" column for each player
+
+        Args:
+            time_vencedor (Time): winner team
+        """
+
         # caso empate
         if time_vencedor is None:
             for j in self.jogo.jogadores:
@@ -212,6 +248,19 @@ class Mesa:
         time2: Time,
         valor: int = 1,
     ) -> Tuple[Union[Time, None], List[Jogador]]:
+        """Simulate 3 rounds and determines the winners
+
+        Args:
+            jogadores (List[Jogador]): list of players
+            time1 (Time): team 1
+            time2 (Time): team 2
+            valor (int, optional): The points that the winners get. Defaults to 1.
+
+        Returns:
+            Tuple[Union[Time, None], List[Jogador]]: winner(s) (None if draw)
+        """
+
+        # TODO: test the unlikely cases
 
         self.jogadores = jogadores
         self.next_jogadores = self.jogadores[1:] + [self.jogadores[0]]
@@ -267,6 +316,8 @@ class Mesa:
 
 
 class Jogo:
+    """Registers scores and simulates Games."""
+
     def __init__(
         self,
         nr_mesas: int,
@@ -306,14 +357,19 @@ class Jogo:
 
             self.registrar_scores(n_mesa.stats)
 
+    def registrar_scores(self, mesa_stats: Dict[str, Dict[str, int]]) -> None:
+        """Register scores coming from Game class.
+
+        Args:
+            mesa_stats (Dict[str, Dict[str, int]]): Game (three rounds) scores.
+        """
+        for _, stats in mesa_stats.items():
+            for k, v in stats.items():
+                self.mesas_stats[k].append(v)
+
     def __str__(self) -> str:
         return (
             f"baralho={self.baralho}\n"
             + f"jogadores={self.jogadores}\ntime1={self.time1}\n"
             + f"time2={self.time2}\n"
         )
-
-    def registrar_scores(self, mesa_stats: Dict[str, Dict[str, int]]) -> None:
-        for jogador, stats in mesa_stats.items():
-            for k, v in stats.items():
-                self.mesas_stats[k].append(v)

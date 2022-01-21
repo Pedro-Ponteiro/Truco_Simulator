@@ -5,6 +5,8 @@ from modules.classes.classes_base import Jogada, Jogador, Mesa, Time
 
 
 class Estrategia:
+    """Strategy used by NormalPlayer"""
+
     def __init__(
         self,
         turno: int,
@@ -27,12 +29,22 @@ class Estrategia:
         }
 
     def escolher_melhor_carta(self) -> Carta:
+        """Uses turn strategy to choose best card.
+
+        Returns:
+            Carta: chosen card
+        """
         if len(self.jogador.mao) == 1:
             return self.jogador.get_menor_carta_mao()
 
         return self.turno_estrategia[self.turno]()
 
     def primeiro_turno(self) -> Carta:
+        """Strategy for the first turn
+
+        Returns:
+            Carta: chosen card
+        """
         if self.pontos_time_rival > 0:
             # print("iniciando com a minha maior")
             return self.jogador.get_maior_carta_mao()
@@ -41,6 +53,11 @@ class Estrategia:
             return self.jogador.get_menor_carta_mao()
 
     def segundo_terceiro_turno(self) -> Carta:
+        """Strategy for the second and third turn.
+
+        Returns:
+            Carta: chosen card
+        """
 
         maior_carta_mao = self.jogador.get_maior_carta_mao()
         menor_carta_mao = self.jogador.get_menor_carta_mao()
@@ -75,6 +92,11 @@ class Estrategia:
         return carta_jogada
 
     def quarto_turno(self) -> Carta:
+        """Strategy for the forth turn.
+
+        Returns:
+            Carta: chosen card
+        """
 
         if self.is_empate():
             if self.pontos_time_rival > 0:
@@ -95,7 +117,12 @@ class Estrategia:
 
         return self.jogador.escolher_menor_possivel(valor_a_ser_alcancado)
 
-    def is_empate(self):
+    def is_empate(self) -> bool:
+        """Check if it is currently a draw.
+
+        Returns:
+            bool: True if draw, False otherwise.
+        """
 
         maior_carta_entre_jogadas = [
             j.jogador
@@ -110,16 +137,45 @@ class Estrategia:
 
 
 class JogadorProbabilistico(Jogador):
+    """Player responsible for choosing the card.
+
+    Args:
+        Jogador: Abstract super class. Has methods wrapping these ones.
+    """
+
     def get_maior_carta_mao(self) -> Carta:
+        """Returns highest available card.
+
+        Returns:
+            Carta: highest card
+        """
         return self.mao[-1]
 
     def get_menor_carta_mao(self) -> Carta:
+        """Returns lowest card.
+
+        Returns:
+            Carta: lowest card
+        """
         return self.mao[0]
 
     def remover_carta_mao(self, carta: Carta) -> None:
+        """Remove the card from the player hand.
+
+        Args:
+            carta (Carta): card to be removed
+        """
         self.mao.remove(carta)
 
     def escolher_menor_possivel(self, maior_carta_rodada: int) -> Carta:
+        """Finds the next higher/equal card value from player hand.
+
+        Args:
+            maior_carta_rodada (int): games current highest card.
+
+        Returns:
+            Carta: best card possible.
+        """
         cartas_maiores_ou_iguais: List[bool] = [
             c.num >= maior_carta_rodada for c in self.mao
         ]
@@ -134,6 +190,16 @@ class JogadorProbabilistico(Jogador):
     def escolher_jogada(
         self, jogadas_rodada: List[Jogada], mesa: Mesa, time_inimigo: Time
     ) -> Jogada:
+        """Chooses the card based on game status and strategy.
+
+        Args:
+            jogadas_rodada (List[Jogada]): player moves that have been made already.
+            mesa (Mesa): three round data
+            time_inimigo (Time): enemy team object
+
+        Returns:
+            Jogada: player move
+        """
 
         turno: int = len(jogadas_rodada) + 1
 

@@ -6,11 +6,15 @@ from typing import List, Tuple
 
 @dataclass
 class Carta:
+    """Card with type and value (num)"""
+
     type: int
     num: int
 
 
 class Baralho:
+    """Deck of cards."""
+
     def __init__(self) -> None:
 
         self.tipo_carta: Carta = Carta
@@ -26,12 +30,19 @@ class Baralho:
         self.valor_maximo: int = max(self.cartas, key=lambda carta: carta.num).num
 
     def coletar_cartas(self):
+        """Reset the deck."""
         self.cartas = self.bkp_cartas.copy()
 
     def embaralhar_cartas(self):
+        """Shuffle the deck."""
         shuffle(self.cartas)
 
     def _get_card_infos(self) -> Tuple[List[int], List[int]]:
+        """Define the cards available and their values.
+
+        Returns:
+            Tuple[List[int], List[int]]: list of card values and card types values
+        """
         card_types = {
             "ouros": 1,
             "espada": 2,

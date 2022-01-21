@@ -7,6 +7,14 @@ from modules.classes.jogadores import JogadorProbabilistico
 
 
 def main(nr_maos: int) -> int:
+    """Simulate games and output data to dados.csv and dados.pickle.
+
+    Args:
+        nr_maos (int): number of rows to be generated (each set of 3 rounds has 4 rows)
+
+    Returns:
+        int: number of hands generated
+    """
     jogador1, jogador2 = JogadorProbabilistico("Pedro"), JogadorProbabilistico("Manu")
     jogador3, jogador4 = JogadorProbabilistico("Mari"), JogadorProbabilistico("Ariel")
     time1 = Time("PENU", jogador1, jogador2)
