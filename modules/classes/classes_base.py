@@ -193,34 +193,16 @@ class Mesa:
                 jogador.mao.append(carta)
             cartas_ord = sorted(jogador.mao, key=lambda c: c.num)
             jogador.mao = cartas_ord
-            registro_jogador = self.stats[jogador.nome]
-            registro_jogador["high_carta"] = cartas_ord[2].num
-            registro_jogador["medium_carta"] = cartas_ord[1].num
-            registro_jogador["low_carta"] = cartas_ord[0].num
 
-        # TODO: TESTES AQUI PRA BAIXO
-        # cartas_time1 = sorted(jogadores[0].mao + jogadores[2].mao,
-        # key=lambda x: x.num)
-        # cartas_time2 = sorted(jogadores[1].mao + jogadores[3].mao,
-        # key=lambda x: x.num)
-        # pts_time1 = sum([c.num for c in cartas_time1[-2:]])
-        # pts_time2 = sum([c.num for c in cartas_time2[-2:]])
+            self.register_player_initial_data(cartas_ord, jogador.nome)
 
-        # if pts_time1 == pts_time2:
-        #     pts_time1 = sum([c.num for c in cartas_time1[-3:]])
-        #     pts_time2 = sum([c.num for c in cartas_time2[-3:]])
-
-        # print("-------------------")
-        # if pts_time1 > pts_time2:
-        #     print(f"{jogadores[0].time} deveria vencer com {pts_time1}")
-        #     self.deveria_vencer: Time = jogadores[0].time
-        # elif pts_time2 > pts_time1:
-        #     print(f"{jogadores[1].time} deveria vencer com {pts_time2}")
-        #     self.deveria_vencer: Time = jogadores[1].time
-        # else:
-        #     print("Ninguem deveria vencer!")
-        #     self.deveria_vencer: Time = None
-        # print("------------------")
+    def register_player_initial_data(
+        self, ordered_cards: List[Carta], player_name: str
+    ) -> None:
+        registro_jogador = self.stats[player_name]
+        registro_jogador["high_carta"] = ordered_cards[2].num
+        registro_jogador["medium_carta"] = ordered_cards[1].num
+        registro_jogador["low_carta"] = ordered_cards[0].num
 
     def setup_jogador_time(self, time1: Time, time2: Time) -> None:
         """Resets the players hands and team points.
@@ -249,6 +231,11 @@ class Mesa:
         for jogador in time_vencedor.jogadores:
             self.stats[jogador.nome]["resultado"] = 1
 
+    def reorder_players_after_round(self, round_winners: List[Jogador]) -> None:
+        if len(round_winners) == 1:
+            idx = self.jogadores.index(round_winners[0])
+            self.jogadores = self.jogadores[idx:] + self.jogadores[:idx]
+
     def get_vencedor(
         self,
         jogadores: List[Jogador],
@@ -270,10 +257,10 @@ class Mesa:
         # TODO: test the unlikely cases
 
         self.jogadores = jogadores
-        self.next_jogadores = self.jogadores[1:] + [self.jogadores[0]]
         self.valor = valor
 
         self.distribuir_cartas(self.jogadores)
+        self.next_jogadores = self.jogadores[1:] + [self.jogadores[0]]
         vencedores: List[List[Jogador]] = []
 
         for _ in range(3):
@@ -281,9 +268,7 @@ class Mesa:
             rodada_winner = Rodada(time1, time2).get_vencedor(self.jogadores, self)
             vencedores.append(rodada_winner)
 
-            if len(rodada_winner) == 1:
-                idx = jogadores.index(rodada_winner[0])
-                self.jogadores = jogadores[idx:] + jogadores[:idx]
+            self.reorder_players_after_round(rodada_winner)
 
             for jogador in rodada_winner:
                 jogador.time.pontos_mesa += 1
@@ -306,16 +291,6 @@ class Mesa:
                         vencedor = None
 
                 break
-
-        # TODO: TESTE
-        # print("-" * 10)
-        # print("-" * 10)
-        # print(f"{vencedor} é o vencedor!")
-        # if (not self.deveria_vencer is None) and (vencedor != self.deveria_vencer):
-        #     input("Ele não deveria vencer! Oh no....")
-
-        # print("-" * 10)
-        # print("-" * 10)
 
         self.register_scores(vencedor)
         self.setup_jogador_time(time1, time2)
