@@ -199,6 +199,12 @@ class Mesa:
     def register_player_initial_data(
         self, ordered_cards: List[Carta], player_name: str
     ) -> None:
+        """Register initial data about the players hand.
+
+        Args:
+            ordered_cards (List[Carta]): list of cards ordered
+            player_name (str): player's name
+        """
         registro_jogador = self.stats[player_name]
         registro_jogador["high_carta"] = ordered_cards[2].num
         registro_jogador["medium_carta"] = ordered_cards[1].num
@@ -232,6 +238,12 @@ class Mesa:
             self.stats[jogador.nome]["resultado"] = 1
 
     def reorder_players_after_round(self, round_winners: List[Jogador]) -> None:
+        """Reorder the players according to who won the last round
+
+        Args:
+            round_winners (List[Jogador]): list of players ho won the round
+            (more than 1 if draw)
+        """
         if len(round_winners) == 1:
             idx = self.jogadores.index(round_winners[0])
             self.jogadores = self.jogadores[idx:] + self.jogadores[:idx]
