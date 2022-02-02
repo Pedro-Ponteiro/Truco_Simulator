@@ -186,15 +186,18 @@ class Mesa:
             self.manilha = self.vira + 1
 
         for jogador in jogadores:
-            for _ in range(3):
-                carta = self.baralho.cartas.pop()
-                if carta.num == self.manilha:
-                    carta = Carta(carta.suit, self.baralho.valor_maximo + carta.suit)
-                jogador.mao.append(carta)
-            cartas_ord = sorted(jogador.mao, key=lambda c: c.num)
-            jogador.mao = cartas_ord
+            self.setup_player(jogador)
 
-            self.register_player_initial_data(cartas_ord, jogador.nome)
+    def setup_player(self, player: Jogador) -> None:
+        for _ in range(3):
+            carta = self.baralho.cartas.pop()
+            if carta.num == self.manilha:
+                carta = Carta(carta.suit, self.baralho.valor_maximo + carta.suit)
+            player.mao.append(carta)
+        cartas_ord = sorted(player.mao, key=lambda c: c.num)
+        player.mao = cartas_ord
+
+        self.register_player_initial_data(cartas_ord, player.nome)
 
     def register_player_initial_data(
         self, ordered_cards: List[Carta], player_name: str
