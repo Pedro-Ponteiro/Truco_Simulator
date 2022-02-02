@@ -2,8 +2,8 @@
 
 from typing import List, Optional
 
-from modules.classes.baralho import Carta
-from modules.classes.classes_base import Jogada, Jogador, Mesa, Time
+from modules.classes.base_classes import Jogada, Jogador, Mesa, Time
+from modules.classes.deck import Carta
 
 
 class Estrategia:

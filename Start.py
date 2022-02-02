@@ -2,15 +2,15 @@
 
 from time import perf_counter
 
-import modules.gerar_dados
+import modules.generate_simulations
 
 
 def main() -> None:
     """Start the program."""
-    nr_maos = int(input("Quantidade de maos para gerar: \n-> "))
+    nr_maos = int(input("Number of hands to simulate (rows): \n-> "))
 
     start = perf_counter()
-    qtd_maos = modules.gerar_dados.main(nr_maos)
+    qtd_maos = modules.generate_simulations.main(nr_maos)
     elapsed = perf_counter() - start
     print(f"Elapsed time (seconds): {elapsed:.2f}")
     print(f"Hands per second: {qtd_maos//elapsed}")

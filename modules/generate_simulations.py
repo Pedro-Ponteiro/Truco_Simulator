@@ -4,8 +4,8 @@ import os
 
 import pandas as pd
 
-from modules.classes.classes_base import Jogo, Time
-from modules.classes.jogadores import JogadorProbabilistico
+from modules.classes.base_classes import Jogo, Time
+from modules.classes.players import JogadorProbabilistico
 
 
 def main(nr_maos: int) -> int:
@@ -24,13 +24,15 @@ def main(nr_maos: int) -> int:
 
     nr_mesas = nr_maos // 4
 
-    # TODO: passar apenas o time1 e time2 como parametros
+    # TODO: only pass teams as parameters
     jogo = Jogo(nr_mesas, [jogador1, jogador3, jogador2, jogador4], time1, time2)
 
     df = pd.DataFrame(jogo.mesas_stats)
-    print(f"Quantidade de mãos geradas: {len(df)}")
+    print(f"Number of hands generated: {len(df)}")
 
-    df.to_pickle(os.path.join(".", "dados.pickle"))
-    df.to_csv(os.path.join(".", "dados.csv"))
+    df.to_pickle(os.path.join(".", "data.pickle"))
+    df.to_csv(os.path.join(".", "data.csv"))
+
+    print("Hands data saved to 'data.csv' and 'data.pickle'")
 
     return len(df)
