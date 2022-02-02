@@ -5,368 +5,363 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Union
 
-from modules.classes.deck import Baralho, Carta
+from modules.classes.deck import Card, Deck
 
 
 @dataclass
-class Jogada:
+class Play:
     """Player move."""
 
-    jogador: Jogador
-    valor_carta: int
+    player: Player
+    card_value: int
 
 
-class Jogador:
+class Player:
     """Player abstract class."""
 
     def __init__(self, nome: str) -> None:
-        self.mao: List[Carta] = []
-        self.nome: str = nome
-        self.parceiro: Jogador = None
-        self.time: Time = None
+        self.hand: List[Card] = []
+        self.name: str = nome
+        self.partner: Player = None
+        self.team: Team = None
 
-    def _wrap_escolher_jogada(
-        self, jogadas_rodada: List[Jogada], mesa: Mesa, time_inimigo: Time
-    ) -> Jogada:
+    def _wrap_choose_play(
+        self, round_plays: List[Play], table: Table, enemy_team: Team
+    ) -> Play:
         """Wrapper that is used by Game object to interact with Player object.
 
         Args:
-            jogadas_rodada (List[Jogada]): list of player moves during the round
-            mesa (Mesa): list of player moves during the 3 round game
-            time_inimigo (Time): enemy team object
+            round_plays (List[Play]): list of player moves during the round
+            table (Table): list of player moves during the 3 round game
+            enemy_team (Team): enemy team object
 
         Returns:
-            Jogada: chosen card
+            Play: chosen card
         """
-        return self.escolher_jogada(jogadas_rodada, mesa, time_inimigo)
+        return self.choose_play(round_plays, table, enemy_team)
 
-    def escolher_jogada(self, jogadas_rodada: List[Jogada], mesa: Mesa) -> Jogada:
+    def choose_play(self, round_plays: List[Play], table: Table) -> Play:
         """Abstract method for children to implement.
 
         Args:
-            jogadas_rodada (List[Jogada]): list of player moves during the round
-            mesa (Mesa): list of player moves during the 3 round game
+            round_plays (List[Play]): list of player moves during the round
+            table (Table): list of player moves during the 3 round game
 
         Returns:
-            Jogada: chosen card
+            Play: chosen card
         """
         ...
 
     def __str__(self) -> str:
 
         return (
-            f"Jogador(mao={[c.num for c in self.mao]},"
-            + "nome={self.nome},"
-            + "parceiro={self.parceiro.nome})"
+            f"Player(hand={[c.value for c in self.hand]},"
+            + f"name={self.name},"
+            + f"partner={self.partner.name})"
         )
 
     def __repr__(self) -> str:
 
-        return self.nome
+        return self.name
 
 
-class Time:
+class Team:
     """Team of three players."""
 
-    def __init__(self, nome: str, jogador1: Jogador, jogador2: Jogador) -> None:
-        self.nome: str = nome
-        self.jogadores: List[Jogador] = (jogador1, jogador2)
-        jogador1.parceiro = jogador2
-        jogador2.parceiro = jogador1
-        jogador1.time = self
-        jogador2.time = self
+    def __init__(self, name: str, player1: Player, player2: Player) -> None:
+        self.name: str = name
+        self.players: List[Player] = (player1, player2)
+        player1.partner = player2
+        player2.partner = player1
+        player1.team = self
+        player2.team = self
 
-        # Setados ao longo das rodadas, vide classe Rodada
-        self.pontos_jogo: int = 0
-        self.pontos_mesa: int = 0
+        # Manipulated during rounds, tables and games
+        self.game_points: int = 0
+        self.table_points: int = 0
 
     def __str__(self) -> str:
         return (
-            f"Time(nome={self.nome},"
-            + "pts_jogo={self.pontos_jogo},"
-            + "pts_mesa={self.pontos_mesa})"
+            f"Team(name={self.name},"
+            + f"game_pts={self.game_points},"
+            + f"table_pts={self.table_points})"
         )
 
     def __repr__(self) -> str:
         return (
-            f"Time(nome={self.nome},"
-            + "pts_jogo={self.pontos_jogo},"
-            + "pts_mesa={self.pontos_mesa})"
+            f"Team(name={self.name},"
+            + f"game_pts={self.game_points},"
+            + f"table_pts={self.table_points})"
         )
 
 
-class Rodada:
+class Round:
     """Round of the game (each game is made of 3 of these)."""
 
-    def __init__(self, time1: Time, time2: Time) -> None:
-        self.jogadas: List[Jogada] = []
-        self.time1 = time1
-        self.time2 = time2
+    def __init__(self, team1: Team, team2: Team) -> None:
+        self.plays: List[Play] = []
+        self.team1 = team1
+        self.team2 = team2
 
-    def get_vencedor(self, jogadores: List[Jogador], mesa: Mesa) -> List[Jogador]:
+    def get_winner(self, players: List[Player], table: Table) -> List[Player]:
         """Iterates through players and decides round winner.
 
         Args:
-            jogadores (List[Jogador]): players list
-            mesa (Mesa): game in which the round belongs
+            players (List[Player]): players list
+            table (Table): game in which the round belongs
 
         Returns:
-            List[Jogador]: list of winners (more than one if draw)
+            List[Player]: list of winners (more than one if draw)
         """
-        player_max_scorer: List[Jogador] = []
+        player_max_scorer: List[Player] = []
         player_max_score = 0
-        for idx_jogador in range(0, len(jogadores)):
+        for idx_player in range(0, len(players)):
 
-            jogador = jogadores[idx_jogador]
-            time_inimigo = jogadores[idx_jogador - 1].time
-            jogada = jogador._wrap_escolher_jogada(self.jogadas, mesa, time_inimigo)
-            # print(jogada)
-            self.jogadas.append(jogada)
-            # print(self.jogadas)
-            mesa.jogadas_mesa.append(jogada)
+            player = players[idx_player]
+            enemy_team = players[idx_player - 1].team
+            play = player._wrap_choose_play(self.plays, table, enemy_team)
+            self.plays.append(play)
+            table.table_plays.append(play)
 
-            score = jogada.valor_carta
+            score = play.card_value
             if score > player_max_score:
-                player_max_scorer = [jogador]
+                player_max_scorer = [player]
                 player_max_score = score
-            elif score == player_max_score and player_max_scorer[0] != jogador.parceiro:
-                player_max_scorer = player_max_scorer + [jogador]
+            elif score == player_max_score and player_max_scorer[0] != player.partner:
+                player_max_scorer = player_max_scorer + [player]
         # print("-" * 10)
         return player_max_scorer
 
 
-class Mesa:
+class Table:
     """Game made of three rounds."""
 
-    def __init__(self, jogo: Jogo, valor: int = 1) -> None:
+    def __init__(self, game: Game, table_value: int = 1) -> None:
 
-        # preparando o baralho...
-        jogo.baralho.coletar_cartas()
-        jogo.baralho.embaralhar_cartas()
+        # preparing the deck
+        game.deck.collect_cards()
+        game.deck.shuffle_cards()
 
-        # herdando algumas definições do jogo...
-        self.baralho: Baralho = jogo.baralho
+        # extending some game definitions...
+        self.deck: Deck = game.deck
 
-        self.jogo = jogo
+        self.game = game
 
-        # Setado em "distribuir_cartas"
+        # determined at "distribute_cards"
         self.manilha: int = 0
         self.vira: int = 0
 
-        # setado no método get_vencedor
-        self.valor: int = valor
+        # determined at get_winner func
+        self.table_value: int = table_value
 
-        # Adicionados ao longo das rodadas
-        self.jogadas_mesa: List[Jogada] = []
+        # Added along rounds
+        self.table_plays: List[Play] = []
 
-        # linhas para a tabela mesas_stats da classe jogo
-        # chave possui nome do jogador, valor é a linha
+        # rows for the attribute table_stats in Game class
+        # key is player name, value is his stats
         self.stats: Dict[str, Dict[str, int]] = {
-            jogador.nome: {
-                "high_carta": 0,
-                "medium_carta": 0,
-                "low_carta": 0,
-                "resultado": 0,
+            player.name: {
+                "highest_card": 0,
+                "middle_card": 0,
+                "lowest_card": 0,
+                "result": 0,
             }
-            for jogador in jogo.jogadores
+            for player in game.players
         }
 
-    def distribuir_cartas(self, jogadores: List[Jogador]) -> None:
+    def distribute_cards(self, players: List[Player]) -> None:
         """Distribute cards among players.
 
         Args:
-            jogadores (List[Jogador]): players participating
+            players (List[Player]): players participating
         """
-        self.vira = self.baralho.cartas.pop().num
+        self.vira = self.deck.cards.pop().value
 
-        # manilha é a proxima!
-        if self.vira == self.baralho.valor_maximo:
+        # manilha is the next
+        if self.vira == self.deck.max_value:
             self.manilha = 1
         else:
             self.manilha = self.vira + 1
 
-        for jogador in jogadores:
-            self.setup_player(jogador)
+        for p in players:
+            self.setup_player(p)
 
-    def setup_player(self, player: Jogador) -> None:
+    def setup_player(self, player: Player) -> None:
         for _ in range(3):
-            carta = self.baralho.cartas.pop()
-            if carta.num == self.manilha:
-                carta = Carta(carta.suit, self.baralho.valor_maximo + carta.suit)
-            player.mao.append(carta)
-        cartas_ord = sorted(player.mao, key=lambda c: c.num)
-        player.mao = cartas_ord
+            card = self.deck.cards.pop()
+            if card.value == self.manilha:
+                card = Card(card.suit, self.deck.max_value + card.suit)
+            player.hand.append(card)
+        ordered_cards = sorted(player.hand, key=lambda c: c.value)
+        player.hand = ordered_cards
 
-        self.register_player_initial_data(cartas_ord, player.nome)
+        self.register_player_initial_data(ordered_cards, player.name)
 
     def register_player_initial_data(
-        self, ordered_cards: List[Carta], player_name: str
+        self, ordered_cards: List[Card], player_name: str
     ) -> None:
         """Register initial data about the players hand.
 
         Args:
-            ordered_cards (List[Carta]): list of cards ordered
+            ordered_cards (List[Card]): list of cards ordered
             player_name (str): player's name
         """
-        registro_jogador = self.stats[player_name]
-        registro_jogador["high_carta"] = ordered_cards[2].num
-        registro_jogador["medium_carta"] = ordered_cards[1].num
-        registro_jogador["low_carta"] = ordered_cards[0].num
+        pĺayer_registry = self.stats[player_name]
+        pĺayer_registry["highest_card"] = ordered_cards[2].value
+        pĺayer_registry["middle_card"] = ordered_cards[1].value
+        pĺayer_registry["lowest_card"] = ordered_cards[0].value
 
-    def setup_jogador_time(self, time1: Time, time2: Time) -> None:
+    def setup_player_and_team(self, team1: Team, team2: Team) -> None:
         """Resets the players hands and team points.
 
         Args:
-            time1 (Time): team 1
-            time2 (Time): team 2
+            team1 (team): team 1
+            team2 (team): team 2
         """
-        time1.pontos_mesa = 0
-        time2.pontos_mesa = 0
+        team1.table_points = 0
+        team2.table_points = 0
 
-        [jogador.mao.clear() for jogador in self.jogadores]
+        [player.hand.clear() for player in self.players]
 
-    def register_scores(self, time_vencedor: Time | None) -> None:
+    def register_scores(self, winner_team: Team | None) -> None:
         """Updates the "results" column for each player.
 
         Args:
-            time_vencedor (Time): winner team
+            winner_team (Team): winner team
         """
-        # caso empate
-        if time_vencedor is None:
-            for j in self.jogo.jogadores:
-                self.stats[j.nome]["resultado"] = 0.5
+        # Draw case
+        if winner_team is None:
+            for j in self.game.players:
+                self.stats[j.name]["result"] = 0.5
             return
 
-        for jogador in time_vencedor.jogadores:
-            self.stats[jogador.nome]["resultado"] = 1
+        for player in winner_team.players:
+            self.stats[player.name]["result"] = 1
 
-    def reorder_players_after_round(self, round_winners: List[Jogador]) -> None:
+    def reorder_players_after_round(self, round_winners: List[Player]) -> None:
         """Reorder the players according to who won the last round
 
         Args:
-            round_winners (List[Jogador]): list of players ho won the round
+            round_winners (List[Player]): list of players ho won the round
             (more than 1 if draw)
         """
         if len(round_winners) == 1:
-            idx = self.jogadores.index(round_winners[0])
-            self.jogadores = self.jogadores[idx:] + self.jogadores[:idx]
+            idx = self.players.index(round_winners[0])
+            self.players = self.players[idx:] + self.players[:idx]
 
-    def get_vencedor(
+    def get_winner(
         self,
-        jogadores: List[Jogador],
-        time1: Time,
-        time2: Time,
-        valor: int = 1,
-    ) -> Tuple[Union[Time, None], List[Jogador]]:
+        players: List[Player],
+        team1: Team,
+        team2: Team,
+        table_value: int = 1,
+    ) -> Tuple[Union[Team, None], List[Player]]:
         """Simulate 3 rounds and determines the winners.
 
         Args:
-            jogadores (List[Jogador]): list of players
-            time1 (Time): team 1
-            time2 (Time): team 2
-            valor (int, optional): The points that the winners get. Defaults to 1.
+            players (List[Player]): list of players
+            team1 (Team): team 1
+            team2 (Team): team 2
+            table_value (int, optional): The points that the winners get. Defaults to 1.
 
         Returns:
-            Tuple[Union[Time, None], List[Jogador]]: winner(s) (None if draw)
+            Tuple[Union[Team, None], List[Player]]: winner(s) (None if draw)
         """
         # TODO: test the unlikely cases
 
-        self.jogadores = jogadores
-        self.valor = valor
+        self.players = players
+        self.table_value = table_value
 
-        self.distribuir_cartas(self.jogadores)
-        self.next_jogadores = self.jogadores[1:] + [self.jogadores[0]]
-        vencedores: List[List[Jogador]] = []
+        self.distribute_cards(self.players)
+        self.next_players = self.players[1:] + [self.players[0]]
+        winners: List[List[Player]] = []
 
         for _ in range(3):
 
-            rodada_winner = Rodada(time1, time2).get_vencedor(self.jogadores, self)
-            vencedores.append(rodada_winner)
+            round_winner = Round(team1, team2).get_winner(self.players, self)
+            winners.append(round_winner)
 
-            self.reorder_players_after_round(rodada_winner)
+            self.reorder_players_after_round(round_winner)
 
-            for jogador in rodada_winner:
-                jogador.time.pontos_mesa += 1
+            for player in round_winner:
+                player.team.table_points += 1
 
-            if time1.pontos_mesa > 1 or time2.pontos_mesa > 1:
+            if team1.table_points > 1 or team2.table_points > 1:
 
-                if time1.pontos_mesa > time2.pontos_mesa:
-                    vencedor = time1
-                elif time2.pontos_mesa > time1.pontos_mesa:
-                    vencedor = time2
+                if team1.table_points > team2.table_points:
+                    winner = team1
+                elif team2.table_points > team1.table_points:
+                    winner = team2
                 else:
-                    # Caso vitoria - derrota - empate, vencedor é o que ganhou primeiro
-                    if len(vencedores[0]) == 1:
-                        vencedor = vencedores[0][0].time
+                    # Case win - loss - draw, winner is who won the first round
+                    if len(winners[0]) == 1:
+                        winner = winners[0][0].team
                     else:
-                        # caso empate-empate, mais uma rodada deve ser jogada
-                        if len(vencedores) == 2:
+                        # Case draw-draw, one more round should be played
+                        if len(winners) == 2:
                             continue
-                        # caso empate-empate-empate
-                        vencedor = None
+                        # Case draw-draw-draw (no winner lol)
+                        winner = None
 
                 break
 
-        self.register_scores(vencedor)
-        self.setup_jogador_time(time1, time2)
-        return vencedor, self.next_jogadores
+        self.register_scores(winner)
+        self.setup_player_and_team(team1, team2)
+        return winner, self.next_players
 
 
-class Jogo:
+class Game:
     """Registers scores and simulates Games."""
 
     def __init__(
         self,
-        nr_mesas: int,
-        jogadores: List[Jogador],
-        time1: Time,
-        time2: Time,
+        table_quantity: int,
+        players: List[Player],
+        team1: Team,
+        team2: Team,
     ) -> None:
 
-        self.baralho: Baralho = Baralho()
+        self.deck: Deck = Deck()
 
-        self.nr_mesas = nr_mesas
+        self.table_quantity = table_quantity
 
-        self.jogadores = jogadores
-        self.time1 = time1
-        self.time2 = time2
+        self.players = players
+        self.team1 = team1
+        self.team2 = team2
 
-        self.valor_mesa: int = 1
+        self.table_value: int = 1
 
-        # queremos uma tabela com as colunas:
-        # high_carta: [int] maior carta
-        # medium_carta: [int] carta do meio
-        # low_carta: [int] menor carta
-        # vitoria: [int] 1 para venceu, 0 para perdeu e 0.5 para empate
-        self.mesas_stats: Dict[str, List[int]] = {
-            "high_carta": [],
-            "medium_carta": [],
-            "low_carta": [],
-            "resultado": [],
+        # highest_card: [int]
+        # middle_card: [int]
+        # lowest_card: [int]
+        # vitoria: [int] 1 for win, 0 for loss and 0.5 for draw
+        self.table_stats: Dict[str, List[int]] = {
+            "highest_card": [],
+            "middle_card": [],
+            "lowest_card": [],
+            "result": [],
         }
 
-        for _ in range(self.nr_mesas):
-            n_mesa = Mesa(self, self.valor_mesa)
+        for _ in range(self.table_quantity):
+            table = Table(self, self.table_value)
 
-            _, self.jogadores = n_mesa.get_vencedor(
-                self.jogadores, self.time1, self.time2
-            )
+            _, self.players = table.get_winner(self.players, self.team1, self.team2)
 
-            self.registrar_scores(n_mesa.stats)
+            self.regsiter_scores(table.stats)
 
-    def registrar_scores(self, mesa_stats: Dict[str, Dict[str, int]]) -> None:
+    def regsiter_scores(self, table_stats: Dict[str, Dict[str, int]]) -> None:
         """Register scores coming from Game class.
 
         Args:
-            mesa_stats (Dict[str, Dict[str, int]]): Game (three rounds) scores.
+            table_stats (Dict[str, Dict[str, int]]): Game (three rounds) scores.
         """
-        for _, stats in mesa_stats.items():
+        for _, stats in table_stats.items():
             for k, v in stats.items():
-                self.mesas_stats[k].append(v)
+                self.table_stats[k].append(v)
 
     def __str__(self) -> str:
         return (
-            f"baralho={self.baralho}\n"
-            + f"jogadores={self.jogadores}\ntime1={self.time1}\n"
-            + f"time2={self.time2}\n"
+            f"deck={self.deck}\n"
+            + f"players={self.players}\nteam1={self.team1}\n"
+            + f"team2={self.team2}\n"
         )

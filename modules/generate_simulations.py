@@ -4,30 +4,31 @@ import os
 
 import pandas as pd
 
-from modules.classes.base_classes import Jogo, Time
-from modules.classes.players import JogadorProbabilistico
+from modules.classes.base_classes import Game, Team
+from modules.classes.players import PlayerImplementation1
 
 
-def main(nr_maos: int) -> int:
+def main(hands_quantity: int) -> int:
     """Simulate games and output data to dados.csv and dados.pickle.
 
     Args:
-        nr_maos (int): number of rows to be generated (each set of 3 rounds has 4 rows)
+        hands_quantity (int): number of rows to be generated
+        (each set of 3 rounds has 4 rows)
 
     Returns:
         int: number of hands generated
     """
-    jogador1, jogador2 = JogadorProbabilistico("Pedro"), JogadorProbabilistico("Manu")
-    jogador3, jogador4 = JogadorProbabilistico("Mari"), JogadorProbabilistico("Ariel")
-    time1 = Time("PENU", jogador1, jogador2)
-    time2 = Time("ARIMA", jogador3, jogador4)
+    player1, player2 = PlayerImplementation1("Pedro"), PlayerImplementation1("Manu")
+    player3, player4 = PlayerImplementation1("Mari"), PlayerImplementation1("Ariel")
+    team1 = Team("PENU", player1, player2)
+    team2 = Team("ARIMA", player3, player4)
 
-    nr_mesas = nr_maos // 4
+    table_quantity = hands_quantity // 4
 
     # TODO: only pass teams as parameters
-    jogo = Jogo(nr_mesas, [jogador1, jogador3, jogador2, jogador4], time1, time2)
+    game = Game(table_quantity, [player1, player3, player2, player4], team1, team2)
 
-    df = pd.DataFrame(jogo.mesas_stats)
+    df = pd.DataFrame(game.table_stats)
     print(f"Number of hands generated: {len(df)}")
 
     df.to_pickle(os.path.join(".", "data.pickle"))

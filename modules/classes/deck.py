@@ -7,37 +7,37 @@ from typing import List, Tuple
 
 
 @dataclass
-class Carta:
+class Card:
     """Card with type and value (num)."""
 
     suit: int
-    num: int
+    value: int
 
 
-class Baralho:
+class Deck:
     """Deck of cards."""
 
     def __init__(self) -> None:
 
-        self.tipo_carta: Carta = Carta
+        self.card_type: Card = Card
 
-        self.card_suits, self.card_nums = self._get_card_infos()
-        self.cartas: List[Carta] = [
-            Carta(c_type, c_num)
-            for c_type, c_num in product(self.card_suits, self.card_nums)
+        self.card_suits, self.card_values = self._get_card_infos()
+        self.cards: List[Card] = [
+            Card(c_type, c_value)
+            for c_type, c_value in product(self.card_suits, self.card_values)
         ]
 
-        self.bkp_cartas: List[Carta] = self.cartas.copy()
+        self.bkp_cards: List[Card] = self.cards.copy()
 
-        self.valor_maximo: int = max(self.cartas, key=lambda carta: carta.num).num
+        self.max_value: int = max(self.cards, key=lambda card: card.value).value
 
-    def coletar_cartas(self) -> None:
+    def collect_cards(self) -> None:
         """Reset the deck."""
-        self.cartas = self.bkp_cartas.copy()
+        self.cards = self.bkp_cards.copy()
 
-    def embaralhar_cartas(self) -> None:
+    def shuffle_cards(self) -> None:
         """Shuffle the deck."""
-        shuffle(self.cartas)
+        shuffle(self.cards)
 
     def _get_card_infos(self) -> Tuple[List[int], List[int]]:
         """Define the cards available and their values.
@@ -46,12 +46,12 @@ class Baralho:
             Tuple[List[int], List[int]]: list of card values and card types values
         """
         card_suits = {
-            "ouros": 1,
-            "espada": 2,
-            "coracao": 3,
-            "paus": 4,
+            "diamonds": 1,
+            "spades": 2,
+            "hearts": 3,
+            "clubs": 4,
         }
-        card_nums = {
+        card_values = {
             "4": 1,
             "5": 2,
             "6": 3,
@@ -64,7 +64,7 @@ class Baralho:
             "3": 10,
         }
 
-        return (list(card_suits.values()), list(card_nums.values()))
+        return (list(card_suits.values()), list(card_values.values()))
 
     def __str__(self) -> str:
-        return f"{self.bkp_cartas}"
+        return f"{self.bkp_cards}"

@@ -2,225 +2,223 @@
 
 from typing import List, Optional
 
-from modules.classes.base_classes import Jogada, Jogador, Mesa, Time
-from modules.classes.deck import Carta
+from modules.classes.base_classes import Play, Player, Table, Team
+from modules.classes.deck import Card
 
 
-class Estrategia:
+class Strategy:
     """Strategy used by NormalPlayer."""
 
     def __init__(
         self,
-        turno: int,
-        maior_carta_rodada: Optional[Jogada],
-        pontos_time_rival: int,
-        jogador: "JogadorProbabilistico",
-        jogadas_rodada: List[Jogada],
+        turn: int,
+        highest_round_card: Optional[Play],
+        rival_team_points: int,
+        player: "PlayerImplementation1",
+        round_plays: List[Play],
     ) -> None:
-        self.turno = turno
-        self.maior_carta_rodada = maior_carta_rodada
-        self.pontos_time_rival = pontos_time_rival
-        self.jogador = jogador
-        self.jogadas_rodada = jogadas_rodada
+        self.turn = turn
+        self.highest_round_card = highest_round_card
+        self.rival_team_points = rival_team_points
+        self.player = player
+        self.round_plays = round_plays
 
-        self.turno_estrategia = {
-            1: self.primeiro_turno,
-            2: self.segundo_terceiro_turno,
-            3: self.segundo_terceiro_turno,
-            4: self.quarto_turno,
+        self.strategy_turn = {
+            1: self.first_turn,
+            2: self.second_third_turn,
+            3: self.second_third_turn,
+            4: self.fourth_turn,
         }
 
-    def escolher_melhor_carta(self) -> Carta:
+    def choose_best_card(self) -> Card:
         """Uses turn strategy to choose best card.
 
         Returns:
-            Carta: chosen card
+            Card: chosen card
         """
-        if len(self.jogador.mao) == 1:
-            return self.jogador.get_menor_carta_mao()
+        if len(self.player.hand) == 1:
+            return self.player.get_lowest_hand_card()
 
-        return self.turno_estrategia[self.turno]()
+        return self.strategy_turn[self.turn]()
 
-    def primeiro_turno(self) -> Carta:
+    def first_turn(self) -> Card:
         """Strategy for the first turn.
 
         Returns:
             Carta: chosen card
         """
-        if self.pontos_time_rival > 0:
-            # print("iniciando com a minha maior")
-            return self.jogador.get_maior_carta_mao()
+        if self.rival_team_points > 0:
+            # print("starting with highest card")
+            return self.player.get_highest_hand_card()
         else:
-            # print("iniciando com a minha menor")
-            return self.jogador.get_menor_carta_mao()
+            # print("starting with lowest card")
+            return self.player.get_lowest_hand_card()
 
-    def segundo_terceiro_turno(self) -> Carta:
+    def second_third_turn(self) -> Card:
         """Strategy for the second and third turn.
 
         Returns:
-            Carta: chosen card
+            Card: chosen card
         """
-        maior_carta_mao = self.jogador.get_maior_carta_mao()
-        menor_carta_mao = self.jogador.get_menor_carta_mao()
+        highest_hand_card = self.player.get_highest_hand_card()
+        lowest_hand_card = self.player.get_lowest_hand_card()
 
-        if self.pontos_time_rival == 1 and self.jogador.time.pontos_mesa == 1:
-            return maior_carta_mao
+        if self.rival_team_points == 1 and self.player.team.table_points == 1:
+            return highest_hand_card
 
-        if self.is_empate():
-            if self.pontos_time_rival > 0:
+        if self.is_draw():
+            if self.rival_team_points > 0:
                 # devo cobrir!
-                # print("Cobrindo o empate")
-                carta_jogada = maior_carta_mao
-                if carta_jogada.num <= self.maior_carta_rodada.valor_carta:
-                    carta_jogada = menor_carta_mao
+                # print("Covering")
+                plays_card = highest_hand_card
+                if plays_card.value <= self.highest_round_card.card_value:
+                    plays_card = lowest_hand_card
             else:
                 # print(jogadas_rodada)
-                # print("Deixo o empate acontecer")
-                carta_jogada = menor_carta_mao
+                # print("Let draw happen")
+                plays_card = lowest_hand_card
         else:
-            if self.maior_carta_rodada.jogador == self.jogador.parceiro:
+            if self.highest_round_card.player == self.player.partner:
                 # descarte
-                # print("Meu parceiro esta fazendo, então...")
-                carta_jogada = menor_carta_mao
+                # print("My partner is already winning, discarding")
+                plays_card = lowest_hand_card
             else:
-                if self.maior_carta_rodada.valor_carta <= maior_carta_mao.num:
-                    # print("vou cobrir ou empatar essa carta com a minha maior")
-                    carta_jogada = maior_carta_mao
+                if self.highest_round_card.card_value <= highest_hand_card.value:
+                    # print("cover")
+                    plays_card = highest_hand_card
                 else:
-                    # print("Descarto, pois não consigo cobrir")
-                    carta_jogada = menor_carta_mao
+                    # print("discarding")
+                    plays_card = lowest_hand_card
 
-        return carta_jogada
+        return plays_card
 
-    def quarto_turno(self) -> Carta:
+    def fourth_turn(self) -> Card:
         """Strategy for the forth turn.
 
         Returns:
-            Carta: chosen card
+            Card: chosen card
         """
-        if self.is_empate():
-            if self.pontos_time_rival > 0:
-                return self.jogador.get_maior_carta_mao()
+        if self.is_draw():
+            if self.rival_team_points > 0:
+                return self.player.get_highest_hand_card()
             else:
-                return self.jogador.get_menor_carta_mao()
+                return self.player.get_lowest_hand_card()
 
-        menor_carta_mao = self.jogador.get_menor_carta_mao()
+        lowest_card_hand = self.player.get_lowest_hand_card()
 
-        if self.maior_carta_rodada.jogador == self.jogador.parceiro:
-            # descarte
-            return menor_carta_mao
+        if self.highest_round_card.player == self.player.partner:
+            # discarding
+            return lowest_card_hand
 
-        valor_a_ser_alcancado = self.maior_carta_rodada.valor_carta
-        if self.pontos_time_rival == 1 and self.jogador.time.pontos_mesa != 1:
+        value_to_be_reached = self.highest_round_card.card_value
+        if self.rival_team_points == 1 and self.player.team.table_points != 1:
             # tenho que me esforçar pra jogar um pouco maior
-            valor_a_ser_alcancado += 1
+            value_to_be_reached += 1
 
-        return self.jogador.escolher_menor_possivel(valor_a_ser_alcancado)
+        return self.player.choose_lowest_possible(value_to_be_reached)
 
-    def is_empate(self) -> bool:
+    def is_draw(self) -> bool:
         """Check if it is currently a draw.
 
         Returns:
             bool: True if draw, False otherwise.
         """
-        maior_carta_entre_jogadas = [
-            j.jogador
-            for j in self.jogadas_rodada
-            if j.valor_carta == self.maior_carta_rodada.valor_carta
+        highest_cards_among_plays = [
+            j.player
+            for j in self.round_plays
+            if j.card_value == self.highest_round_card.card_value
         ]
         if (
-            len(maior_carta_entre_jogadas) > 1
-            and self.jogador.parceiro in maior_carta_entre_jogadas
+            len(highest_cards_among_plays) > 1
+            and self.player.partner in highest_cards_among_plays
         ):
             return True
 
         return False
 
 
-class JogadorProbabilistico(Jogador):
+class PlayerImplementation1(Player):
     """Player responsible for choosing the card.
 
     Args:
-        Jogador: Abstract super class. Has methods wrapping these ones.
+        Player: Abstract super class. Has methods wrapping these ones.
     """
 
-    # TODO: transfer generic methos to abstract class
+    # TODO: transfer generic methods to abstract class
 
-    def get_maior_carta_mao(self) -> Carta:
+    def get_highest_hand_card(self) -> Card:
         """Returns highest available card.
 
         Returns:
-            Carta: highest card
+            Card: highest card
         """
-        return self.mao[-1]
+        return self.hand[-1]
 
-    def get_menor_carta_mao(self) -> Carta:
+    def get_lowest_hand_card(self) -> Card:
         """Returns lowest card.
 
         Returns:
-            Carta: lowest card
+            Card: lowest card
         """
-        return self.mao[0]
+        return self.hand[0]
 
-    def remover_carta_mao(self, carta: Carta) -> None:
+    def remove_card_from_hand(self, card: Card) -> None:
         """Remove the card from the player hand.
 
         Args:
-            carta (Carta): card to be removed
+            card (Card): card to be removed
         """
-        self.mao.remove(carta)
+        self.hand.remove(card)
 
-    def escolher_menor_possivel(self, maior_carta_rodada: int) -> Carta:
+    def choose_lowest_possible(self, value_to_be_reached: int) -> Card:
         """Finds the next higher/equal card value from player hand.
 
         Args:
-            maior_carta_rodada (int): games current highest card.
+            value_to_be_reached (int): games current highest card.
 
         Returns:
             Carta: best card possible.
         """
-        cartas_maiores_ou_iguais: List[bool] = [
-            c.num >= maior_carta_rodada for c in self.mao
+        higher_or_equal_cards: List[bool] = [
+            c.value >= value_to_be_reached for c in self.hand
         ]
 
-        if any(cartas_maiores_ou_iguais):
-            # pega a carta suficiente pra ganhar, não necessariamente a maior da mão
-            return self.mao[cartas_maiores_ou_iguais.index(True)]
+        if any(higher_or_equal_cards):
+            # get card high enough to win
+            return self.hand[higher_or_equal_cards.index(True)]
         else:
-            # nenhuma carta maior ou igual, descarte
-            return self.get_menor_carta_mao()
+            # discarding
+            return self.get_lowest_hand_card()
 
-    def escolher_jogada(
-        self, jogadas_rodada: List[Jogada], mesa: Mesa, time_inimigo: Time
-    ) -> Jogada:
+    def choose_play(
+        self, round_plays: List[Play], table: Table, enemy_team: Team
+    ) -> Play:
         """Chooses the card based on game status and strategy.
 
         Args:
-            jogadas_rodada (List[Jogada]): player moves that have been made already.
-            mesa (Mesa): three round data
-            time_inimigo (Time): enemy team object
+            round_plays (List[Play]): player moves that have been made already.
+            table (Table): three round data
+            enemy_team (Team): enemy team object
 
         Returns:
-            Jogada: player move
+            Play: player move
         """
-        turno: int = len(jogadas_rodada) + 1
+        turn: int = len(round_plays) + 1
 
-        maior_carta_rodada = (
-            max(jogadas_rodada, key=lambda x: x.valor_carta)
-            if len(jogadas_rodada) > 0
+        highest_round_card = (
+            max(round_plays, key=lambda x: x.card_value)
+            if len(round_plays) > 0
             else None
         )
 
-        carta_jogada = Estrategia(
-            turno,
-            maior_carta_rodada,
-            time_inimigo.pontos_mesa,
+        card_played = Strategy(
+            turn,
+            highest_round_card,
+            enemy_team.table_points,
             self,
-            jogadas_rodada,
-        ).escolher_melhor_carta()
+            round_plays,
+        ).choose_best_card()
 
-        self.remover_carta_mao(carta_jogada)
-        jogada = Jogada(self, carta_jogada.num)
-        # print(f"{self.nome} -> {jogada.valor_carta} {[c.num for c in  self.mao]}")
-        # print(jogada)
-        return jogada
+        self.remove_card_from_hand(card_played)
+        play = Play(self, card_played.value)
+        return play

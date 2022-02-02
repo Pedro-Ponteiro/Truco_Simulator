@@ -7,13 +7,13 @@ import modules.generate_simulations
 
 def main() -> None:
     """Start the program."""
-    nr_maos = int(input("Number of hands to simulate (rows): \n-> "))
+    nr_hands = int(input("Number of hands to simulate (rows): \n-> "))
 
     start = perf_counter()
-    qtd_maos = modules.generate_simulations.main(nr_maos)
+    hands_qtd = modules.generate_simulations.main(nr_hands)
     elapsed = perf_counter() - start
     print(f"Elapsed time (seconds): {elapsed:.2f}")
-    print(f"Hands per second: {qtd_maos//elapsed}")
+    print(f"Hands per second: {hands_qtd//elapsed}")
 
 
 if __name__ == "__main__":
